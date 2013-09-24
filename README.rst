@@ -11,7 +11,7 @@ Installation
 
 .. code-block:: bash
 
-    $ pip install httpie-auth
+    $ pip install httpie-oauth
 
 
 You should now see ``oauth1`` under ``--auth-type`` in ``$ http --help`` output.

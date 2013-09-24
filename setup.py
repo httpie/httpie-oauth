@@ -4,17 +4,15 @@ try:
 except ImportError:
     pass
 
-import httpie_oauth
-
 
 setup(
     name='httpie-oauth',
-    description=httpie_oauth.__doc__.strip(),
+    description='OAuth plugin for HTTPie.',
     long_description=open('README.rst').read().strip(),
-    version=httpie_oauth.__version__,
-    author=httpie_oauth.__author__,
+    version='1.0.2',
+    author='Jakub Roztocil',
     author_email='jakub@roztocil.name',
-    license=httpie_oauth.__licence__,
+    license='BSD',
     url='https://github.com/jkbr/httpie-oauth',
     download_url='https://github.com/jkbr/httpie-oauth',
     py_modules=['httpie_oauth'],

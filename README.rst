@@ -1,7 +1,7 @@
 httpie-oauth
 ===========
 
-OAuth plugin for `HTTPie <https://github.com/jkbr/httpie>`_.
+OAuth plugin for `HTTPie <https://httpie.org/>`_.
 
 It currently provides support for OAuth 1.0a 2-legged.
 
@@ -25,7 +25,7 @@ Usage
     $ http --auth-type=oauth1 --auth='client-key:client-secret' example.org
 
 
-You can also use `HTTPie sessions <https://github.com/jkbr/httpie#sessions>`_:
+You can also use `HTTPie sessions <https://httpie.org/doc#sessions>`_:
 
 .. code-block:: bash
 

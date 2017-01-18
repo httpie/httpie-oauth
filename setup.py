@@ -9,7 +9,7 @@ setup(
     name='httpie-oauth',
     description='OAuth plugin for HTTPie.',
     long_description=open('README.rst').read().strip(),
-    version='1.0.2',
+    version='2.0.0',
     author='Jakub Roztocil',
     author_email='jakub@roztocil.name',
     license='BSD',

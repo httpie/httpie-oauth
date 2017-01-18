@@ -1,9 +1,7 @@
 httpie-oauth
-===========
+============
 
-OAuth plugin for `HTTPie <https://httpie.org/>`_.
-
-It currently provides support for OAuth 1.0a 2-legged.
+OAuth 1.0a two-legged plugin for `HTTPie <https://httpie.org/>`_.
 
 
 Installation
@@ -20,10 +18,35 @@ You should now see ``oauth1`` under ``--auth-type`` in ``$ http --help`` output.
 Usage
 -----
 
+HMAC-SHA1
+.........
+
+To use the HMAC-SHA1 signature method, in the ``--auth`` parameter
+provide the client-key, a single colon and the client-secret.
+
 .. code-block:: bash
 
     $ http --auth-type=oauth1 --auth='client-key:client-secret' example.org
 
+It will interactively prompt for the client-secret, if there is no colon.
+
+RSA-SHA1
+........
+
+To use the RSA-SHA1 signature method, in the ``--auth`` parameter
+provide the client-key, two colons and the name of a file containing
+the RSA private key. The file must contain a PEM formatted RSA private
+key.
+
+.. code-block:: bash
+
+    $ http --auth-type=oauth1 --auth='client-key::filename' example.org
+
+It will interactively prompt for the filename, if there is no value
+after the two colons.
+
+HTTPie Sessions
+...............
 
 You can also use `HTTPie sessions <https://httpie.org/doc#sessions>`_:
 
@@ -34,4 +57,3 @@ You can also use `HTTPie sessions <https://httpie.org/doc#sessions>`_:
 
     # Re-use auth
     $ http --session=logged-in POST example.org hello=world
-

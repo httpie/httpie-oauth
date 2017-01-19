@@ -29,6 +29,8 @@ provide the client-key, a single colon and the client-secret.
     $ http --auth-type=oauth1 --auth='client-key:client-secret' example.org
 
 It will interactively prompt for the client-secret, if there is no colon.
+If the password starts with a colon, use this interactive method to enter it
+(otherwise the extra colon will cause it to use RSA-SHA1 instead of HMAC-SHA1).
 
 RSA-SHA1
 ........
@@ -44,6 +46,10 @@ key.
 
 It will interactively prompt for the filename, if there is no value
 after the two colons.
+
+The filename can also be a relative or absolute path to the file.
+
+Passphrase protected private keys are not supported.
 
 HTTPie Sessions
 ...............

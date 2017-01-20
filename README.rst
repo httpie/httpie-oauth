@@ -36,7 +36,7 @@ RSA-SHA1
 ........
 
 To use the RSA-SHA1 signature method, in the ``--auth`` parameter
-provide the client-key, two colons and the name of a file containing
+provide the client key, two colons and the name of a file containing
 the RSA private key. The file must contain a PEM formatted RSA private
 key.
 
@@ -50,6 +50,30 @@ after the two colons.
 The filename can also be a relative or absolute path to the file.
 
 Passphrase protected private keys are not supported.
+
+Providing the client key in the private key file
+++++++++++++++++++++++++++++++++++++++++++++++++
+
+If the client key in the `--auth`` parameter is empty (i.e. the option
+argument is just two colons and the filename), the
+`oauth_consumer_key` parameter from the file is used.  It must appear
+in the file before the private key.
+
+For example, if the private key file contains something like this:
+
+.. code-block
+
+    oauth_consumer_key: myconsumerkey
+    -----BEGIN RSA PRIVATE KEY-----
+    ...
+    -----END RSA PRIVATE KEY-----
+
+It can be used with this command:
+
+.. code-block:: bash
+
+    $ http --auth-type=oauth1 --auth=::filename example.org
+
 
 HTTPie Sessions
 ...............

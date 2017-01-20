@@ -14,6 +14,7 @@ private key is read from that file. If the filename is omitted
 the filename. The username is used as the oauth_client_key OAuth parameter.
 
 """
+import string
 import sys
 from httpie.plugins import AuthPlugin
 from requests_oauthlib import OAuth1
@@ -51,11 +52,11 @@ class OAuth1Plugin(AuthPlugin):
         :return: requests_oauthlib.oauth1_auth.OAuth1 object
         """
         if not password.startswith(':'):
-            # HMAC-SHA1 signature method (--auth username:password)
+            # HMAC-SHA1 signature method (--auth client-key:client-secret)
             return OAuth1(client_key=username, client_secret=password)
 
         else:
-            # RSA-SHA1 signature method (--auth username::filename)
+            # RSA-SHA1 signature method (--auth oauth_consumer_key::filename)
             filename = password[1:]
             if len(filename) == 0:
                 # Prompt for filename of RSA private key
@@ -64,39 +65,47 @@ class OAuth1Plugin(AuthPlugin):
                 except EOFError:  # if ^D entered
                     sys.exit(1)
 
-            key = OAuth1Plugin.read_private_key(filename)
+            username, key = OAuth1Plugin.read_private_key(username, filename)
 
             return OAuth1(client_key=username,
                           signature_method=SIGNATURE_RSA,
                           rsa_key=key)
 
     @staticmethod
-    def read_private_key(filename):
+    def read_private_key(username, filename):
         """
         Check if the key is a recognised private key format.
 
         Prints an error message to stderr and exits if it is not. Uses
         crude checks to try and generate more useful error messages.
 
+        :param username: username to use
         :param filename: file to read private key from
         :return: PEM formatted private key
         """
-        try:
-            key = open(filename).read()
+        PEM_PRIVATE_KEY_BEGINNING = '-----BEGIN RSA PRIVATE KEY-----'
+        PEM_PRIVATE_KEY_ENDING = '-----END RSA PRIVATE KEY-----'
+        ATTR_NAME = 'oauth_consumer_key'
 
-            if key.find('-----BEGIN RSA PRIVATE KEY-----') == -1:
+        try:
+            data = open(filename).read()
+
+            key_start = data.find(PEM_PRIVATE_KEY_BEGINNING)
+            key_end = data.find(PEM_PRIVATE_KEY_ENDING)
+
+            if key_start == -1:
                 # Did not find the start of private key.
 
-                if key.find('-----BEGIN PUBLIC KEY-----') != -1 or \
-                   key.find('-----BEGIN RSA PUBLIC KEY-----') != -1 or \
-                   key.find('ssh-rsa ') != -1 or \
-                   key.find('---- BEGIN SSH2 PUBLIC KEY ----') != -1:
+                if data.find('-----BEGIN PUBLIC KEY-----') != -1 or \
+                   data.find('-----BEGIN RSA PUBLIC KEY-----') != -1 or \
+                   data.find('ssh-rsa ') != -1 or \
+                   data.find('---- BEGIN SSH2 PUBLIC KEY ----') != -1:
                     # Appears to contain a PKCS8, PEM, OpenSSH old or
                     # OpenSSH new format public key.
                     # The newer OpenSSH format does not follow RFC7468
                     # and only has 4 hyphens and spaces around the text!
                     err = 'wrong key, please provide the PRIVATE key'
-                elif key.find('-----BEGIN OPENSSH PRIVATE KEY-----') != -1:
+                elif data.find('-----BEGIN OPENSSH PRIVATE KEY-----') != -1:
                     # Appears to contain newer OpenSSH private key format
                     err = 'private key format not supported' + \
                           ', PEM format required'
@@ -104,17 +113,63 @@ class OAuth1Plugin(AuthPlugin):
                     # Generic error message
                     err = 'does not contain a PEM formatted private key'
 
-            elif key.find('-----END RSA PRIVATE KEY-----') == -1:
-                # Found start of private key, but not its end
-                err = 'private key is incomplete'
             else:
-                err = None
+                if key_end == -1:
+                    err = 'private key is incomplete'
+                else:
+                    key_end += len(PEM_PRIVATE_KEY_ENDING)
+                    err = None
+
+            # If the username is blank, try to extract a username from the file
+
+            if len(username) == 0 and err is None:
+                username, err = OAuth1Plugin.extract_username(data, ATTR_NAME,
+                                                              0, key_start)
+
             if err is not None:
                 sys.stderr.write("http: " + filename + ': ' + err)
                 sys.exit(1)
 
-            return key
+            pem_key = data[key_start:key_end]
+
+            return username, pem_key
 
         except IOError as e:
             sys.stderr.write("http: " + str(e))
             sys.exit(1)
+
+    @staticmethod
+    def extract_username(data, attr_name, start, end, limit=8096):
+        """
+        Extract a named parameter from the contents.
+
+        :param data: text to search
+        :param attr_name: name of attribute to look for
+        :param start: index into contents of where to start looking
+        :param end: index into contents of where to stop looking
+        :param limit: upper limit for end position
+        :return: client-key value or None if not found
+        """
+        stop_pos = end
+        if limit < end:
+            stop_pos = limit
+        i = start
+
+        while i < stop_pos:
+            eol_pos = data.find('\n', i, stop_pos)
+            if eol_pos == -1:
+                break  # no more complete lines found
+
+            colon_pos = data.find(':', i, eol_pos)
+            if colon_pos != -1:
+                name = data[i:colon_pos].strip()
+                value = data[colon_pos + 1: eol_pos].strip()
+                if name == attr_name:
+                    return value, None  # successfully found
+            i = eol_pos + 1
+
+        if limit < end:
+            return None, '"{}" not found in first {} characters'.format(
+                         attr_name, limit)
+        else:
+            return None, '"{}" not found before private key'.format(attr_name)

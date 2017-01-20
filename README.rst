@@ -51,17 +51,17 @@ The filename can also be a relative or absolute path to the file.
 
 Passphrase protected private keys are not supported.
 
-Providing the client key in the private key file
+Including the client key in the private key file
 ++++++++++++++++++++++++++++++++++++++++++++++++
 
-If the client key in the `--auth`` parameter is empty (i.e. the option
-argument is just two colons and the filename), the
-`oauth_consumer_key` parameter from the file is used.  It must appear
-in the file before the private key.
+If the client key in the ``--auth`` parameter is empty (i.e. the
+option argument is just two colons and the filename), the
+``oauth_consumer_key`` parameter from the file is used.  It must
+appear in the file before the private key.
 
 For example, if the private key file contains something like this:
 
-.. code-block
+::
 
     oauth_consumer_key: myconsumerkey
     -----BEGIN RSA PRIVATE KEY-----

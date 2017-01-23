@@ -12,8 +12,20 @@ Installation
     $ pip install httpie-oauth
 
 
-You should now see ``oauth1`` under ``--auth-type`` in ``$ http --help`` output.
+You should now see ``oauth1`` under ``--auth-type`` in the
+``$ http --help`` output.
 
+To be able to use the RSA-SHA1 signature type, also install **PyJWT**
+and PyCA's **cryptography** package.
+
+.. code-block:: bash
+
+    $ pip install pyjwt
+    $ pip install cryptography
+
+On CentOS 7, it might be easier to use *yum* to install "epel-release"
+and then the "python2-cryptography" packages, since to *pip install* it
+requires C code to be compiled.
 
 Usage
 -----
@@ -87,3 +99,17 @@ You can also use `HTTPie sessions <https://httpie.org/doc#sessions>`_:
 
     # Re-use auth
     $ http --session=logged-in POST example.org hello=world
+
+
+Troubleshooting
+...............
+
+ImportError: No module named jwt.algorithms
++++++++++++++++++++++++++++++++++++++++++++
+
+The *PyJWT* module is not available. Please install it.
+
+AttributeError: 'module' object has no attribute 'RSAAlgorithm'
++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+The PyCA's *cryptography* module is not available. Please install it.

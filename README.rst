@@ -1,3 +1,11 @@
+
+ℹ️ Please use the newer `httpie-oauth1` plugin instead:
+
+https://github.com/qcif/httpie-oauth1
+
+------
+
+
 httpie-oauth
 ===========
 
